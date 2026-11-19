@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SnapBack — Planificateur Focus & Boomerang Anti-Distraction</title>
+  <link rel="stylesheet" href="demo.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <svg class="icon-mark" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M8 1.5L13.5 3.5V7.5C13.5 11 11.2 13.4 8 14.5C4.8 13.4 2.5 11 2.5 7.5V3.5L8 1.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <circle cx="8" cy="7.5" r="2" fill="currentColor"/>
+        </svg>
+        <span class="brand-name">SnapBack</span>
+        <span class="version-tag">v1.0.0 · MIT</span>
+      </div>
+
+      <nav class="topnav">
+        <a href="#simulator" class="nav-link" data-i18n="nav_demo">Simulateur</a>
+        <a href="#install" class="nav-link" data-i18n="nav_install">Installation</a>
+        <a href="https://github.com/nadhirXt/snapback" target="_blank" rel="noopener" class="nav-link">GitHub</a>
+        <button id="demo-lang-btn" class="lang-btn" type="button">FR</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <!-- Asymmetric Split Hero -->
+    <section class="hero" id="simulator">
+      <div class="hero-copy">
+        <div class="eyebrow">
+          <span class="dot dot-green"></span>
+          <span data-i18n="hero_eyebrow">Extension navigateur open-source pour le TDAH</span>
+        </div>
+        <h1 data-i18n="hero_title">
+          Ferme tes distractions en 3 secondes et reviens sur ton document de travail
+        </h1>
+        <p class="hero-sub" data-i18n="hero_sub">
+          Planifie tes sites de travail et tes sites à fermer. Dès que Google Docs, Drive ou GitHub est ouvert, la protection s'active seule. Si tu ouvres Instagram par réflexe, SnapBack ferme l'onglet après 3 secondes et remet le focus sur ton travail.
+        </p>
+
+        <div class="hero-actions">
+          <button id="btn-hero-trigger" class="btn-primary" type="button">
+            <span data-i18n="hero_cta_test">Simuler l'ouverture d'instagram.com</span>
+            <kbd class="keycap">Ctrl+T</kbd>
+          </button>
+          <a href="#install" class="btn-secondary" data-i18n="hero_cta_install">
+            Installer gratuitement
+          </a>
+        </div>
+
+        <div class="hero-specs">
+          <div class="spec-item">
+            <span class="spec-val">0 $</span>
+            <span class="spec-lbl" data-i18n="spec_free">Open-source MIT</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-val">3 s</span>
+            <span class="spec-lbl" data-i18n="spec_boomerang">Rappel Boomerang</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-val">100 %</span>
+            <span class="spec-lbl" data-i18n="spec_local">Local sans serveur</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visual Moment: Interactive Mini-Browser Simulator -->
+      <div class="simulator-frame" aria-label="Simulateur interactif SnapBack">
+        <div class="browser-bar">
+          <div class="window-dots">
+            <span></span><span></span><span></span>
+          </div>
+
+          <div class="browser-tabs">
+            <div class="sim-tab active" id="sim-tab-work">
+              <span class="dot dot-green"></span>
+              <span class="sim-tab-title">Projet_Final — Google Docs</span>
+            </div>
+            <div class="sim-tab hidden" id="sim-tab-distraction">
+              <span class="dot dot-red"></span>
+              <span class="sim-tab-title">instagram.com</span>
+            </div>
+          </div>
+
+          <button id="btn-sim-open-ig" class="sim-trigger-btn" type="button" data-i18n="sim_btn_open">
+            + Ouvrir instagram.com
+          </button>
+        </div>
+
+        <div class="browser-urlbar">
+          <span class="url-protocol">https://</span>
+          <span class="url-text" id="sim-url-text">docs.google.com/document/d/projet-final</span>
+          <span class="url-badge" id="sim-shield-badge" data-i18n="sim_badge_auto">Auto-Focus actif</span>
+        </div>
+
+        <!-- Viewport State A: Active Work Document -->
+        <div class="sim-viewport" id="sim-view-work">
+          <div class="doc-canvas">
+            <div class="doc-header-row">
+              <div>
+                <div class="doc-title" data-i18n="sim_doc_title">Architecture & Mémoire de Fin d'Études</div>
+                <div class="doc-meta" data-i18n="sim_doc_meta">Cible de travail active · Protection SnapBack enclenchée automatiquement</div>
+              </div>
+              <span class="doc-counter"><span id="sim-avoided-count">0</span> <span data-i18n="sim_avoided_suffix">interception(s)</span></span>
+            </div>
+            <div class="doc-lines">
+              <div class="doc-line w-90"></div>
+              <div class="doc-line w-75"></div>
+              <div class="doc-line w-85"></div>
+              <div class="doc-line w-60"></div>
+            </div>
+
+            <div class="doc-prompt-box">
+              <p data-i18n="sim_prompt_text">
+                Tu travailles sur ce document. Clique ci-dessous pour simuler le réflexe d'ouvrir Instagram dans un nouvel onglet :
+              </p>
+              <button id="btn-doc-trigger" class="btn-primary-sm" type="button" data-i18n="sim_btn_try">
+                Tester le réflexe instagram.com (3 s)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Viewport State B: 3-Second Boomerang Interception -->
+        <div class="sim-viewport hidden" id="sim-view-blocked">
+          <div class="sim-blocked-card">
+            <div class="sim-blocked-top">
+              <span class="sim-blocked-title" data-i18n="sim_blk_title">Concentre-toi</span>
+              <span class="sim-countdown-pill"><span id="sim-countdown-num">3</span>s</span>
+            </div>
+            <p class="sim-blocked-sub" data-i18n="sim_blk_sub">
+              Accès réflexe à instagram.com intercepté avant chargement
+            </p>
+
+            <div class="sim-trajectory">
+              <div class="sim-node">
+                <div class="sim-node-lbl">
+                  <span class="dot dot-red"></span>
+                  <span data-i18n="sim_node_closed">Onglet intercepté</span>
+                </div>
+                <div class="sim-node-val">instagram.com</div>
+              </div>
+
+              <div class="sim-arc">
+                <svg viewBox="0 0 80 28" fill="none" class="sim-arc-svg">
+                  <path d="M74 20C54 5 26 5 6 20" stroke="#4cc38a" stroke-width="1.5" stroke-dasharray="3 3"/>
+                  <path d="M11 15L5.5 20.5L12 22.5" stroke="#4cc38a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+
+              <div class="sim-node sim-node-target">
+                <div class="sim-node-lbl">
+                  <span class="dot dot-green"></span>
+                  <span data-i18n="sim_node_target">Retour automatique</span>
+                </div>
+                <div class="sim-node-val">Projet_Final — Google Docs</div>
+              </div>
+            </div>
+
+            <div class="sim-progress-track">
+              <div class="sim-progress-bar" id="sim-progress-bar"></div>
+            </div>
+
+            <button id="btn-sim-return-now" class="btn-primary-sm full-width" type="button" data-i18n="sim_btn_return_now">
+              Fermer et revenir au document maintenant
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Installation Guide Auto-Detected by Browser -->
+    <section class="install-section" id="install">
+      <div class="install-header">
+        <div>
+          <h2 data-i18n="inst_title">Comment installer et utiliser SnapBack</h2>
+          <p class="install-sub" data-i18n="inst_sub">
+            100 % gratuit, sans compte et sans serveur. Choisis ton navigateur ci-dessous :
+          </p>
+        </div>
+
+        <div class="browser-tabs-Bar" role="tablist">
+          <button type="button" class="b-tab active" data-browser="brave">Brave / Chrome</button>
+          <button type="button" class="b-tab" data-browser="edge">Microsoft Edge (1 clic)</button>
+        </div>
+      </div>
+
+      <!-- Brave / Chrome Guide (0$ GitHub Release .zip) -->
+      <div class="install-grid" id="guide-brave">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <h3 data-i18n="brave_s1_title">Télécharger l'archive .zip</h3>
+          <p data-i18n="brave_s1_desc">
+            Récupère la dernière version stable depuis GitHub Releases et décompresse le dossier sur ton ordinateur.
+          </p>
+          <a href="../dist/snapback-v1.0.0.zip" download class="step-link" data-i18n="brave_s1_btn">
+            Télécharger snapback-v1.0.0.zip
+          </a>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <h3 data-i18n="brave_s2_title">Activer le Mode développeur</h3>
+          <p data-i18n="brave_s2_desc">
+            Ouvre brave://extensions ou chrome://extensions, active le Mode développeur en haut à droite et clique sur Charger l'extension non empaquetée.
+          </p>
+          <code class="step-code">brave://extensions</code>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <h3 data-i18n="brave_s3_title">Planifier et tester en 3 s</h3>
+          <p data-i18n="brave_s3_desc">
+            Le planificateur s'ouvre automatiquement : vérifie tes sites de travail, tes sites à fermer, et clique sur Tester le Boomerang (3 s).
+          </p>
+          <span class="step-meta" data-i18n="brave_s3_meta">Prêt en moins de 30 secondes</span>
+        </div>
+      </div>
+
+      <!-- Edge Guide (0$ Edge Add-ons 1-click) -->
+      <div class="install-grid hidden" id="guide-edge">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <h3 data-i18n="edge_s1_title">Installation en 1 clic (Edge Add-ons)</h3>
+          <p data-i18n="edge_s1_desc">
+            Sur Microsoft Edge, installe directement l'extension vérifiée en 1 clic ou charge l'archive .zip dans edge://extensions.
+          </p>
+          <code class="step-code">edge://extensions</code>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <h3 data-i18n="edge_s2_title">Épingler SnapBack</h3>
+          <p data-i18n="edge_s2_desc">
+            Clique sur l'icône d'extensions dans la barre d'outils Edge et affiche SnapBack pour ajouter n'importe quel site en 1 clic.
+          </p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <h3 data-i18n="edge_s3_title">Auto-Focus en arrière-plan</h3>
+          <p data-i18n="edge_s3_desc">
+            Ouvre ton outil de travail habituel (Google Docs, Drive, GitHub) : le badge passe automatiquement sur AUTO.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="demo.js"></script>
+</body>
+</html>

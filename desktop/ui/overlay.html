@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SnapBack</title>
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background-color: var(--bg-deep);
+    }
+    .overlay-panel {
+      width: 100%;
+      max-width: 608px;
+      background-color: var(--surface-card);
+      border: 1px solid var(--hairline-strong);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .overlay-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .overlay-grid {
+      display: grid;
+      grid-template-columns: 1fr 80px 1.2fr;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background-color: var(--bg-deep);
+      border: 1px solid var(--hairline);
+      border-radius: 12px;
+    }
+    .ov-node {
+      background-color: var(--surface-card);
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .ov-node-target {
+      border-color: rgba(76, 195, 138, 0.3);
+    }
+    .ov-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .ov-val {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ov-center {
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 20px;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body>
+  <main class="overlay-panel">
+    <header class="overlay-top">
+      <div class="sidebar-brand">
+        <svg class="icon-mark" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M8 1.5L13.5 3.5V7.5C13.5 11 11.2 13.4 8 14.5C4.8 13.4 2.5 11 2.5 7.5V3.5L8 1.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <circle cx="8" cy="7.5" r="2" fill="currentColor"/>
+        </svg>
+        <span class="brand-wordmark">SnapBack</span>
+      </div>
+      <span class="mono-timer"><span id="ov-sec">3</span> s</span>
+    </header>
+
+    <div>
+      <h1 data-i18n="blk_title">Concentre-toi</h1>
+      <p class="subtitle">
+        <span data-i18n="blk_subtitle_prefix">Accès réflexe à</span>
+        <code id="ov-distraction">instagram.com</code>
+        <span data-i18n="blk_subtitle_suffix">intercepté</span>
+      </p>
+    </div>
+
+    <section class="overlay-grid">
+      <div class="ov-node">
+        <div class="ov-meta" data-i18n="blk_node_intercepted">Fenêtre interceptée</div>
+        <div class="ov-val" id="ov-node-blocked">instagram.com</div>
+      </div>
+
+      <div class="ov-center">
+        <span id="ov-ring-num">3</span>s
+      </div>
+
+      <div class="ov-node ov-node-target">
+        <div class="ov-meta" data-i18n="blk_node_target">Cible de retour</div>
+        <div class="ov-val" id="ov-node-work">VS Code</div>
+      </div>
+    </section>
+
+    <div class="sim-track">
+      <div id="ov-bar" class="sim-bar"></div>
+    </div>
+
+    <button id="btn-ov-now" class="btn-add full-width" type="button" data-i18n="blk_btn_return">
+      Revenir à mon travail maintenant
+    </button>
+  </main>
+
+  <script type="module" src="overlay.js"></script>
+</body>
+</html>

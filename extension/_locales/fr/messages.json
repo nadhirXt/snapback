@@ -1,0 +1,18 @@
+{
+  "appName": {
+    "message": "SnapBack — Planificateur Focus & Retour Auto 3s",
+    "description": "Nom complet de l'extension"
+  },
+  "appShortName": {
+    "message": "SnapBack",
+    "description": "Nom court de l'extension"
+  },
+  "appDescription": {
+    "message": "Planifie tes sites de travail et tes sites à fermer. Ferme les distractions après 3 secondes et te ramène sur ton onglet de travail.",
+    "description": "Description de l'extension"
+  },
+  "actionTitle": {
+    "message": "SnapBack — Planifier ma session",
+    "description": "Infobulle du bouton de barre d'outils"
+  }
+}

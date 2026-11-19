@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SnapBack — Planificateur de session</title>
+  <link rel="stylesheet" href="options.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Left Sidebar (264px, deepest graphite surface) -->
+    <aside class="sidebar">
+      <div class="sidebar-top-row">
+        <div class="sidebar-brand">
+          <svg class="icon-mark" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M8 1.5L13.5 3.5V7.5C13.5 11 11.2 13.4 8 14.5C4.8 13.4 2.5 11 2.5 7.5V3.5L8 1.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="8" cy="7.5" r="2" fill="currentColor"/>
+          </svg>
+          <span class="brand-wordmark">SnapBack</span>
+        </div>
+        <button id="opt-btn-lang" class="lang-btn" type="button" title="FR / EN">FR</button>
+      </div>
+
+      <div class="sidebar-status">
+        <div class="sidebar-group-label" data-i18n="opt_engine_state">État du moteur</div>
+        <div class="status-pill" id="opt-status-pill">...</div>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Sections">
+        <div class="sidebar-group-label" data-i18n="opt_nav_config">Configuration</div>
+        <a href="#sec-work" class="nav-row active">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="8" cy="8" r="2" fill="currentColor"/>
+          </svg>
+          <span data-i18n="opt_nav_work">Sites de travail</span>
+        </a>
+        <a href="#sec-block" class="nav-row">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M6.5 11.5L3 8L6.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3.5 8H10.5C12.1569 8 13.5 9.34315 13.5 11V11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span data-i18n="opt_nav_block">Sites à fermer</span>
+        </a>
+        <a href="#sec-schedule" class="nav-row">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 5V8L10 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span data-i18n="opt_nav_schedule">Horaires programmés</span>
+        </a>
+      </nav>
+
+      <!-- Visual Moment in Sidebar: Boomerang Principle -->
+      <div class="sidebar-diagram">
+        <div class="sidebar-group-label" data-i18n="opt_cycle_title">Cycle Boomerang</div>
+        <div class="flow-step">
+          <span class="flow-num">01</span>
+          <div class="flow-body">
+            <div class="flow-title" data-i18n="opt_step1_title">Détection</div>
+            <div class="flow-caption" data-i18n="opt_step1_desc">S'active dès qu'un site de travail planifié est ouvert</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <span class="flow-num">02</span>
+          <div class="flow-body">
+            <div class="flow-title" data-i18n="opt_step2_title">Interception</div>
+            <div class="flow-caption" data-i18n="opt_step2_desc">Coupe tout site distrayant avant chargement</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <span class="flow-num">03</span>
+          <div class="flow-body">
+            <div class="flow-title" data-i18n="opt_step3_title">Rappel 3 s</div>
+            <div class="flow-caption" data-i18n="opt_step3_desc">Ferme l'onglet et remet le focus sur ton document</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+      <header class="page-header">
+        <div>
+          <h1 data-i18n="opt_page_title">Planificateur de session</h1>
+          <p class="subtitle" data-i18n="opt_page_subtitle">
+            Définis les domaines sur lesquels tu travailles et ceux que SnapBack doit fermer automatiquement
+          </p>
+        </div>
+        <div id="save-toast" class="save-toast hidden" data-i18n="opt_saved_toast">Modifications enregistrées</div>
+      </header>
+
+      <div id="lock-warning" class="lock-warning hidden" data-i18n="opt_lock_warning">
+        Session verrouillée en cours — les listes et horaires redeviendront modifiables à la fin du minuteur
+      </div>
+
+      <!-- First-Run Onboarding Banner (3 steps + 1-click Boomerang test) -->
+      <section id="welcome-card" class="welcome-card hidden">
+        <div class="welcome-header">
+          <div class="welcome-title-row">
+            <span class="dot dot-work"></span>
+            <h2 data-i18n="opt_welcome_title">Démarrage rapide en 3 étapes</h2>
+          </div>
+          <button id="btn-dismiss-welcome" class="btn-secondary-sm" type="button" data-i18n="opt_btn_dismiss_welcome">
+            Masquer ce guide
+          </button>
+        </div>
+        <div class="welcome-steps">
+          <p class="welcome-step" data-i18n="opt_welcome_s1">
+            1. Clique sur l'icône puzzle de ton navigateur et épingle SnapBack dans la barre
+          </p>
+          <p class="welcome-step" data-i18n="opt_welcome_s2">
+            2. Vérifie tes sites de travail (cibles de retour) et tes sites à fermer ci-dessous
+          </p>
+          <p class="welcome-step" data-i18n="opt_welcome_s3">
+            3. Lance une simulation de 3 secondes pour voir l'effet Boomerang en action
+          </p>
+        </div>
+        <div class="welcome-actions">
+          <button id="btn-test-boomerang" class="btn-add" type="button" data-i18n="opt_btn_test_boomerang">
+            Tester le Boomerang (3 s)
+          </button>
+        </div>
+      </section>
+
+      <!-- Visual Overview Banner: Live Architecture Preview -->
+      <section class="architecture-card" aria-label="Schéma actif">
+        <div class="arch-node">
+          <div class="arch-head">
+            <span class="dot dot-work"></span>
+            <span data-i18n="opt_arch_node1">1. Onglet de travail ouvert</span>
+          </div>
+          <div class="arch-code">docs.google.com · drive.google.com</div>
+          <div class="arch-note" data-i18n="opt_arch_note1">Active la protection et sert de cible de retour</div>
+        </div>
+
+        <div class="arch-connector">
+          <svg class="arch-svg" viewBox="0 0 120 32" fill="none" aria-hidden="true">
+            <path d="M110 22C82 6 38 6 10 22" stroke="#4cc38a" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <path d="M15 16L9 22.5L16.5 25" stroke="#4cc38a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="arch-badge">Boomerang 3 s</span>
+        </div>
+
+        <div class="arch-node">
+          <div class="arch-head">
+            <span class="dot dot-block"></span>
+            <span data-i18n="opt_arch_node2">2. Distraction interceptée</span>
+          </div>
+          <div class="arch-code">instagram.com · tiktok.com</div>
+          <div class="arch-note" data-i18n="opt_arch_note2">Onglet fermé après 3 s, retour direct à gauche</div>
+        </div>
+      </section>
+
+      <!-- Section 1: Planned Work Sites -->
+      <section class="card" id="sec-work">
+        <div class="card-header">
+          <div>
+            <h2 data-i18n="opt_sec1_title">1. Sites de travail planifiés</h2>
+            <p class="card-desc" data-i18n="opt_sec1_desc">
+              Domaines correspondant à tes outils de travail. SnapBack te ramène sur le dernier onglet ouvert de cette liste après chaque interception.
+            </p>
+          </div>
+          <label class="switch-row">
+            <input type="checkbox" id="opt-auto-trigger" />
+            <span data-i18n="opt_auto_label">Auto-activer quand un site de travail est ouvert</span>
+          </label>
+        </div>
+
+        <div class="suggestions-bar">
+          <span class="sug-label" data-i18n="opt_quick_adds">Ajouts rapides</span>
+          <div id="work-suggestions" class="sug-chips"></div>
+        </div>
+
+        <div id="opt-work-tags" class="tags-area"></div>
+
+        <form id="opt-form-work" class="add-row">
+          <input type="text" id="opt-input-work" data-i18n-placeholder="opt_work_ph" placeholder="Domaine de travail (ex. docs.google.com, figma.com, localhost)" />
+          <button type="submit" class="btn-add" data-i18n="opt_btn_add_work">Ajouter aux sites de travail</button>
+        </form>
+      </section>
+
+      <!-- Section 2: Mode & Distraction / Allowed Sites -->
+      <section class="card" id="sec-block">
+        <div class="card-header">
+          <div>
+            <h2 data-i18n="opt_sec2_title">2. Sites à fermer</h2>
+            <p class="card-desc" data-i18n="opt_sec2_desc">
+              En liste noire, seuls les domaines ci-dessous sont fermés. En liste blanche, tout domaine absent de tes sites de travail et de la liste autorisée est fermé.
+            </p>
+          </div>
+          <div class="mode-selector">
+            <label>
+              <input type="radio" name="mode" value="blacklist" id="mode-blacklist" />
+              <span data-i18n="opt_radio_blacklist">Liste noire</span>
+            </label>
+            <label>
+              <input type="radio" name="mode" value="whitelist" id="mode-whitelist" />
+              <span data-i18n="opt_radio_whitelist">Liste blanche stricte</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Blacklist panel -->
+        <div id="panel-blacklist">
+          <div class="suggestions-bar">
+            <span class="sug-label" data-i18n="opt_common_distractions">Distractions courantes</span>
+            <div id="block-suggestions" class="sug-chips"></div>
+          </div>
+          <div id="opt-blacklist-tags" class="tags-area"></div>
+          <form id="opt-form-blacklist" class="add-row">
+            <input type="text" id="opt-input-blacklist" data-i18n-placeholder="opt_blacklist_ph" placeholder="Domaine à fermer (ex. instagram.com, tiktok.com, youtube.com)" />
+            <button type="submit" class="btn-add" data-i18n="opt_btn_add_blacklist">Ajouter aux sites à fermer</button>
+          </form>
+        </div>
+
+        <!-- Whitelist panel -->
+        <div id="panel-whitelist" class="hidden">
+          <p class="hint-note" data-i18n="opt_whitelist_hint">
+            Tes sites de travail planifiés (Section 1) sont toujours autorisés. Ajoute ici les domaines d'authentification ou de référence nécessaires comme accounts.google.com.
+          </p>
+          <div id="opt-whitelist-tags" class="tags-area"></div>
+          <form id="opt-form-whitelist" class="add-row">
+            <input type="text" id="opt-input-whitelist" data-i18n-placeholder="opt_whitelist_ph" placeholder="Domaine autorisé (ex. accounts.google.com, stackoverflow.com)" />
+            <button type="submit" class="btn-add" data-i18n="opt_btn_add_whitelist">Autoriser ce domaine</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Section 3: Recurring Schedule -->
+      <section class="card" id="sec-schedule">
+        <div class="card-header">
+          <div>
+            <h2 data-i18n="opt_sec3_title">3. Horaires programmés</h2>
+            <p class="card-desc" data-i18n="opt_sec3_desc">
+              Active automatiquement la protection sur une plage horaire récurrente, même lorsqu'aucun onglet de travail n'est ouvert.
+            </p>
+          </div>
+          <label class="switch-row">
+            <input type="checkbox" id="sched-enabled" />
+            <span data-i18n="opt_sched_enable">Activer la plage horaire</span>
+          </label>
+        </div>
+
+        <div class="schedule-grid">
+          <div class="days-picker" id="sched-days">
+            <button type="button" class="day-btn" data-day="1">Lun</button>
+            <button type="button" class="day-btn" data-day="2">Mar</button>
+            <button type="button" class="day-btn" data-day="3">Mer</button>
+            <button type="button" class="day-btn" data-day="4">Jeu</button>
+            <button type="button" class="day-btn" data-day="5">Ven</button>
+            <button type="button" class="day-btn" data-day="6">Sam</button>
+            <button type="button" class="day-btn" data-day="0">Dim</button>
+          </div>
+          <div class="time-inputs">
+            <label>
+              <span data-i18n="opt_sched_start">Début</span>
+              <input type="time" id="sched-start" value="09:00" />
+            </label>
+            <label>
+              <span data-i18n="opt_sched_end">Fin</span>
+              <input type="time" id="sched-end" value="17:00" />
+            </label>
+            <button type="button" id="btn-save-schedule" class="btn-add" data-i18n="opt_btn_save_sched">Enregistrer l'horaire</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>

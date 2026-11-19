@@ -1,0 +1,86 @@
+name: CI & Multi-OS Release (Linux, Windows, Extension)
+
+on:
+  push:
+    branches: [main, master]
+    tags: ["v*"]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test-core-and-extension:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Verify core sync and run JS unit tests
+        run: |
+          npm test
+          npm run check-core
+
+      - name: Package browser extension zip
+        run: npm run package
+
+      - name: Upload extension zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapback-extension-zip
+          path: dist/snapback-extension-v1.0.0.zip
+
+  test-and-build-desktop:
+    needs: test-core-and-extension
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: ubuntu-22.04
+            os_name: linux
+          - platform: windows-latest
+            os_name: windows
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Sync core modules
+        run: node scripts/sync-core.mjs
+
+      - name: Install Linux system dependencies (WebKit2GTK & X11)
+        if: matrix.os_name == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Run Rust unit tests (hosts & platform)
+        working-directory: desktop/src-tauri
+        run: cargo test
+
+      - name: Build Tauri Desktop Installers (.deb, .AppImage, .msi, .exe)
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: desktop/src-tauri
+          tagName: v__VERSION__
+          releaseName: "SnapBack v__VERSION__ (Linux, Windows & Browser Extension)"
+          releaseBody: "Download the free open-source SnapBack installer for Linux (.deb / .AppImage), Windows (.msi / .exe), or the Browser Extension (.zip)."
+          releaseDraft: false
+          prerelease: false

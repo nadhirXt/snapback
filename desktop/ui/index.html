@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SnapBack — Planificateur Desktop (Linux & Windows)</title>
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Left Sidebar (264px, Graphite #0f0f10) -->
+    <aside class="sidebar">
+      <div class="sidebar-top-row">
+        <div class="sidebar-brand">
+          <svg class="icon-mark" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M8 1.5L13.5 3.5V7.5C13.5 11 11.2 13.4 8 14.5C4.8 13.4 2.5 11 2.5 7.5V3.5L8 1.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="8" cy="7.5" r="2" fill="currentColor"/>
+          </svg>
+          <span class="brand-wordmark">SnapBack</span>
+        </div>
+        <button id="desk-btn-lang" class="lang-btn" type="button">FR</button>
+      </div>
+
+      <div class="sidebar-status">
+        <div class="sidebar-group-label" data-i18n="opt_engine_state">État du moteur</div>
+        <div class="status-pill" id="desk-status-pill">...</div>
+      </div>
+
+      <!-- Quick Session Lock in Sidebar -->
+      <div class="sidebar-sessions">
+        <div class="sidebar-group-label" data-i18n="popup_sec3_title">Session verrouillée</div>
+        <div class="session-row">
+          <button type="button" class="btn-session" data-minutes="25">25m</button>
+          <button type="button" class="btn-session" data-minutes="50">50m</button>
+          <button type="button" class="btn-session" data-minutes="90">90m</button>
+        </div>
+        <div class="sidebar-toggles">
+          <label class="switch-row">
+            <input type="checkbox" id="desk-manual-on" />
+            <span data-i18n="popup_manual_toggle">Manuel</span>
+          </label>
+          <span class="stats-badge"><span id="desk-stats-total">0</span> aujourd'hui</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Navigation">
+        <div class="sidebar-group-label" data-i18n="opt_nav_config">Configuration</div>
+        <a href="#sec-picker" class="nav-row active">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M2 6H14" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <span data-i18n="desk_pick_window">Fenêtres ouvertes</span>
+        </a>
+        <a href="#sec-work" class="nav-row">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="8" cy="8" r="2" fill="currentColor"/>
+          </svg>
+          <span data-i18n="opt_nav_work">Espace de travail</span>
+        </a>
+        <a href="#sec-block" class="nav-row">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M6.5 11.5L3 8L6.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3.5 8H10.5C12.1569 8 13.5 9.34315 13.5 11V11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span data-i18n="opt_nav_block">Sites et applis à fermer</span>
+        </a>
+        <a href="#sec-schedule" class="nav-row">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 5V8L10 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span data-i18n="opt_nav_schedule">Horaires programmés</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-diagram">
+        <button id="btn-desk-test" class="btn-add full-width" type="button" data-i18n="opt_btn_test_boomerang">
+          Tester SnapBack (3 s)
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+      <header class="page-header">
+        <div>
+          <h1 data-i18n="opt_page_title">Planificateur SnapBack</h1>
+          <p class="subtitle" data-i18n="opt_page_subtitle">
+            Définis tes outils de travail (sites + applications) et les distractions que SnapBack doit fermer automatiquement
+          </p>
+        </div>
+        <div id="save-toast" class="save-toast hidden" data-i18n="opt_saved_toast">Modifications enregistrées</div>
+      </header>
+
+      <!-- 30s anti-impulse cooldown banner -->
+      <section id="desk-delay-box" class="delay-banner hidden">
+        <span data-i18n="popup_delay_text">Pause anti-impulsion avant désactivation</span>
+        <span class="mono-timer"><span id="desk-delay-sec">30</span> s</span>
+        <button id="btn-desk-cancel-delay" class="btn-add" type="button" data-i18n="popup_delay_cancel">
+          Maintenir la protection active
+        </button>
+      </section>
+
+      <div id="lock-warning" class="lock-warning hidden" data-i18n="opt_lock_warning">
+        Session verrouillée en cours — les listes et horaires redeviendront modifiables à la fin du minuteur
+      </div>
+
+      <!-- Visual Moment: Live OS SnapBack Circuit + 1-Click Open Window Picker -->
+      <section class="card" id="sec-picker">
+        <div class="card-header">
+          <div>
+            <h2 data-i18n="desk_pick_window">Choisir parmi les fenêtres ouvertes</h2>
+            <p class="card-desc">
+              Sélectionne n'importe quelle fenêtre active sur ton PC (Linux ou Windows) pour l'ajouter en 1 clic comme outil de travail ou distraction à fermer.
+            </p>
+          </div>
+          <button id="btn-refresh-windows" class="btn-secondary" type="button" data-i18n="desk_refresh_windows">
+            Actualiser les fenêtres
+          </button>
+        </div>
+
+        <div class="picker-bar">
+          <select id="select-open-window" class="window-select"></select>
+          <button id="btn-pick-as-work" class="btn-add" type="button">+ Travail</button>
+          <button id="btn-pick-as-block" class="btn-secondary" type="button">+ Distraction</button>
+        </div>
+      </section>
+
+      <!-- Section 1: Work Targets (Apps + Sites) -->
+      <section class="card" id="sec-work">
+        <div class="card-header">
+          <div>
+            <h2 data-i18n="opt_sec1_title">1. Espace de travail planifié (Cibles SnapBack)</h2>
+            <p class="card-desc" data-i18n="opt_sec1_desc">
+              Dès qu'une de ces applications ou l'un de ces sites est ouvert, SnapBack active la protection et te ramène dessus après chaque distraction.
+            </p>
+          </div>
+          <label class="switch-row">
+            <input type="checkbox" id="desk-auto-trigger" />
+            <span data-i18n="opt_auto_label">Auto-activer quand un outil de travail est ouvert</span>
+          </label>
+        </div>
+
+        <!-- 1A: Work Applications -->
+        <div class="sub-block">
+          <div class="sub-title" data-i18n="desk_work_apps_title">Applications de travail (VS Code, LibreOffice, Terminal)</div>
+          <div id="desk-work-apps-tags" class="tags-area"></div>
+          <form id="form-work-app" class="add-row">
+            <input type="text" id="input-work-app" data-i18n-placeholder="desk_work_apps_ph" placeholder="Nom du processus (ex. code, soffice.bin, obsidian)" />
+            <button type="submit" class="btn-add" data-i18n="desk_btn_add_work_app">Ajouter l'application</button>
+          </form>
+        </div>
+
+        <!-- 1B: Work Sites (All Browsers) -->
+        <div class="sub-block">
+          <div class="sub-title" data-i18n="popup_sec1_title">Sites de travail (tous navigateurs)</div>
+          <div id="desk-work-sites-tags" class="tags-area"></div>
+          <form id="form-work-site" class="add-row">
+            <input type="text" id="input-work-site" data-i18n-placeholder="opt_work_ph" placeholder="Domaine de travail (ex. docs.google.com, github.com)" />
+            <button type="submit" class="btn-add" data-i18n="opt_btn_add_work">Ajouter aux sites de travail</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Section 2: Distractions to Close (Sites + Apps + Strict Hosts Mode) -->
+      <section class="card" id="sec-block">
+        <div class="card-header">
+          <div>
+            <h2 data-i18n="opt_sec2_title">2. Distractions à fermer (Tous navigateurs & Applications)</h2>
+            <p class="card-desc">
+              Les sites sont détectés dans Firefox, Chrome, Brave et Edge (fermeture d'onglet après 3 s). Les applications sont minimisées ou fermées selon ton choix.
+            </p>
+          </div>
+        </div>
+
+        <!-- 2A: Blocked Sites -->
+        <div class="sub-block">
+          <div class="sub-title" data-i18n="popup_sec2_blacklist">Sites à fermer (Firefox, Chrome, Brave, Edge)</div>
+          <div id="desk-blacklist-tags" class="tags-area"></div>
+          <form id="form-blocked-site" class="add-row">
+            <input type="text" id="input-blocked-site" data-i18n-placeholder="opt_blacklist_ph" placeholder="Domaine à fermer (ex. instagram.com, tiktok.com, youtube.com)" />
+            <button type="submit" class="btn-add" data-i18n="opt_btn_add_blacklist">Ajouter aux sites à fermer</button>
+          </form>
+        </div>
+
+        <!-- 2B: Blocked Desktop Applications (Minimize vs Kill toggle) -->
+        <div class="sub-block">
+          <div class="sub-title" data-i18n="desk_blocked_apps_title">Applications distrayantes (Discord, Steam, Jeux)</div>
+          <div id="desk-blocked-apps-list" class="app-rows"></div>
+          <form id="form-blocked-app" class="add-row">
+            <input type="text" id="input-blocked-app" data-i18n-placeholder="desk_blocked_apps_ph" placeholder="Nom du processus (ex. discord, steam, spotify)" />
+            <button type="submit" class="btn-add" data-i18n="desk_btn_add_blocked_app">Ajouter aux applis à fermer</button>
+          </form>
+        </div>
+
+        <!-- 2C: Optional Strict System Hosts Mode -->
+        <div class="strict-box">
+          <div>
+            <div class="sub-title" data-i18n="desk_strict_title">Mode Strict (Blocage système fichier hosts)</div>
+            <p class="card-desc" data-i18n="desk_strict_desc">
+              Bloque les domaines au niveau réseau dans tous les navigateurs via /etc/hosts (Linux) ou hosts (Windows). Demande les droits administrateur.
+            </p>
+          </div>
+          <label class="switch-row">
+            <input type="checkbox" id="desk-strict-mode" />
+            <span data-i18n="desk_strict_toggle">Activer le blocage réseau hosts</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Section 3: Recurring Schedule -->
+      <section class="card" id="sec-schedule">
+        <div class="card-header">
+          <div>
+            <h2 data-i18n="opt_sec3_title">3. Horaires programmés</h2>
+            <p class="card-desc" data-i18n="opt_sec3_desc">
+              Active automatiquement la protection sur une plage horaire récurrente.
+            </p>
+          </div>
+          <label class="switch-row">
+            <input type="checkbox" id="sched-enabled" />
+            <span data-i18n="opt_sched_enable">Activer la plage horaire</span>
+          </label>
+        </div>
+
+        <div class="schedule-grid">
+          <div class="days-picker" id="sched-days">
+            <button type="button" class="day-btn" data-day="1">Lun</button>
+            <button type="button" class="day-btn" data-day="2">Mar</button>
+            <button type="button" class="day-btn" data-day="3">Mer</button>
+            <button type="button" class="day-btn" data-day="4">Jeu</button>
+            <button type="button" class="day-btn" data-day="5">Ven</button>
+            <button type="button" class="day-btn" data-day="6">Sam</button>
+            <button type="button" class="day-btn" data-day="0">Dim</button>
+          </div>
+          <div class="time-inputs">
+            <label>
+              <span data-i18n="opt_sched_start">Début</span>
+              <input type="time" id="sched-start" value="09:00" />
+            </label>
+            <label>
+              <span data-i18n="opt_sched_end">Fin</span>
+              <input type="time" id="sched-end" value="17:00" />
+            </label>
+            <button type="button" id="btn-save-schedule" class="btn-add" data-i18n="opt_btn_save_sched">Enregistrer l'horaire</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- In-App 3-Second SnapBack Simulation Modal -->
+  <div id="sim-modal" class="sim-modal hidden">
+    <div class="sim-modal-card">
+      <div class="sim-modal-head">
+        <span class="dot dot-work"></span>
+        <span>SnapBack — Interception 3 s</span>
+        <span class="mono-timer"><span id="sim-modal-sec">3</span> s</span>
+      </div>
+      <h3>Concentre-toi</h3>
+      <p class="card-desc">
+        Simulation : fermeture de <code>instagram.com</code> et retour automatique sur <strong id="sim-modal-target">VS Code / Google Docs</strong>
+      </p>
+      <div class="sim-track">
+        <div id="sim-modal-bar" class="sim-bar"></div>
+      </div>
+      <button id="btn-close-sim-modal" class="btn-add full-width" type="button">
+        Revenir à ma fenêtre de travail maintenant
+      </button>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

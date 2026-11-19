@@ -1,0 +1,18 @@
+{
+  "appName": {
+    "message": "SnapBack — ADHD Focus Planner & 3s Auto-Return",
+    "description": "Extension full name"
+  },
+  "appShortName": {
+    "message": "SnapBack",
+    "description": "Extension short name"
+  },
+  "appDescription": {
+    "message": "Plan your work sites and distraction sites. Automatically closes distractions after 3 seconds and snaps focus back to your work tab.",
+    "description": "Extension description"
+  },
+  "actionTitle": {
+    "message": "SnapBack — Plan my session",
+    "description": "Toolbar button tooltip"
+  }
+}

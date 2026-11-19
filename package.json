@@ -1,0 +1,25 @@
+{
+  "name": "snapback",
+  "version": "1.0.0",
+  "description": "SnapBack — Free open-source ADHD focus app for Linux & Windows (Tauri 2) and browser extension: plan your work tools and distractions, auto-activate focus, and snap back from distractions in 3 seconds.",
+  "type": "module",
+  "scripts": {
+    "sync-core": "node scripts/sync-core.mjs",
+    "check-core": "node scripts/sync-core.mjs --check",
+    "test": "node scripts/sync-core.mjs && node --test tests/*.test.js",
+    "package": "node scripts/sync-core.mjs && bash scripts/build-zip.sh"
+  },
+  "keywords": [
+    "snapback",
+    "adhd",
+    "focus",
+    "productivity",
+    "tauri",
+    "linux",
+    "windows",
+    "chrome-extension",
+    "deep-work"
+  ],
+  "author": "Nadhir",
+  "license": "MIT"
+}

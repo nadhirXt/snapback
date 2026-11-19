@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SnapBack</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="brand">
+      <svg class="icon-mark" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M8 1.5L13.5 3.5V7.5C13.5 11 11.2 13.4 8 14.5C4.8 13.4 2.5 11 2.5 7.5V3.5L8 1.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        <circle cx="8" cy="7.5" r="2" fill="currentColor"/>
+      </svg>
+      <span class="brand-name">SnapBack</span>
+    </div>
+
+    <div class="header-right">
+      <div class="status-indicator" id="status-banner">
+        <span class="status-dot" id="status-dot"></span>
+        <span class="status-label" id="status-label">...</span>
+      </div>
+      <button id="btn-toggle-lang" class="lang-btn" type="button" title="FR / EN">FR</button>
+      <button id="btn-open-options" class="icon-btn" type="button" title="Options" aria-label="Options">
+        <svg class="icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M2.5 4.5H13.5M2.5 8H13.5M2.5 11.5H13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="5.5" cy="4.5" r="1.5" fill="#19191b" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="10.5" cy="8" r="1.5" fill="#19191b" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="6.5" cy="11.5" r="1.5" fill="#19191b" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 30s anti-impulse countdown bar (hidden by default) -->
+  <section class="delay-box hidden" id="delay-box">
+    <div class="delay-row">
+      <span class="delay-text" data-i18n="popup_delay_text">Pause anti-impulsion avant désactivation</span>
+      <span class="delay-timer"><span id="delay-sec">30</span>s</span>
+    </div>
+    <button id="btn-cancel-delay" class="btn-primary-compact" type="button" data-i18n="popup_delay_cancel">
+      Maintenir la protection active
+    </button>
+  </section>
+
+  <!-- Visual Moment: Live Boomerang Circuit + Current Tab Quick Action -->
+  <section class="circuit-card" id="current-tab-card">
+    <div class="circuit-diagram">
+      <div class="circuit-node circuit-node-work">
+        <div class="circuit-node-head">
+          <span class="dot dot-work"></span>
+          <span data-i18n="popup_circuit_work">Cible de travail</span>
+        </div>
+        <div class="circuit-node-val" id="circuit-work-preview">docs.google.com</div>
+      </div>
+
+      <div class="circuit-arc">
+        <svg class="arc-svg" viewBox="0 0 64 24" fill="none" aria-hidden="true">
+          <path d="M58 17C44 5 20 5 6 17" stroke="#4cc38a" stroke-width="1.5" stroke-dasharray="2.5 2.5"/>
+          <path d="M10 12L5.5 17.5L11.5 19" stroke="#4cc38a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="arc-tag">3s</span>
+      </div>
+
+      <div class="circuit-node circuit-node-block">
+        <div class="circuit-node-head">
+          <span class="dot dot-block"></span>
+          <span data-i18n="popup_circuit_block">Interception</span>
+        </div>
+        <div class="circuit-node-val" id="circuit-block-preview">instagram.com</div>
+      </div>
+    </div>
+
+    <div class="current-tab-bar">
+      <span class="current-tab-domain" id="current-tab-domain">—</span>
+      <div class="current-tab-actions">
+        <button id="btn-add-current-work" class="btn-inline" type="button" data-i18n="popup_add_tab_work">
+          + Travail
+        </button>
+        <button id="btn-add-current-block" class="btn-inline" type="button" data-i18n="popup_add_tab_block">
+          + Fermer
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step 1: Planned Work Sites -->
+  <section class="planner-section">
+    <div class="section-header">
+      <div class="section-title-group">
+        <span class="dot dot-work"></span>
+        <span class="section-title" data-i18n="popup_sec1_title">Sites de travail</span>
+      </div>
+      <label class="toggle-control">
+        <input type="checkbox" id="chk-auto-trigger" />
+        <span data-i18n="popup_auto_toggle">Auto-activation</span>
+      </label>
+    </div>
+    <div class="tag-list" id="work-sites-list"></div>
+    <form id="form-add-work" class="inline-form">
+      <input type="text" id="input-add-work" data-i18n-placeholder="popup_add_work_ph" placeholder="Ajouter un domaine (ex. docs.google.com)" />
+      <button type="submit" data-i18n="popup_btn_add">Ajouter</button>
+    </form>
+  </section>
+
+  <!-- Step 2: Distraction Sites to Close -->
+  <section class="planner-section">
+    <div class="section-header">
+      <div class="section-title-group">
+        <span class="dot dot-block"></span>
+        <span class="section-title" id="block-section-title" data-i18n="popup_sec2_blacklist">Sites à fermer</span>
+      </div>
+      <span class="meta-label" id="mode-pill" data-i18n="popup_mode_blacklist">Liste noire</span>
+    </div>
+    <div class="tag-list" id="block-sites-list"></div>
+    <form id="form-add-block" class="inline-form">
+      <input type="text" id="input-add-block" data-i18n-placeholder="popup_add_block_ph" placeholder="Ajouter un domaine (ex. instagram.com)" />
+      <button type="submit" data-i18n="popup_btn_add">Ajouter</button>
+    </form>
+  </section>
+
+  <!-- Step 3: Session & Manual Activation -->
+  <section class="planner-section">
+    <div class="section-header">
+      <span class="section-title" data-i18n="popup_sec3_title">Session verrouillée</span>
+      <label class="toggle-control">
+        <input type="checkbox" id="chk-manual-on" />
+        <span data-i18n="popup_manual_toggle">Manuel</span>
+      </label>
+    </div>
+    <div class="session-buttons">
+      <button class="btn-session" type="button" data-minutes="25">25 min</button>
+      <button class="btn-session" type="button" data-minutes="50">50 min</button>
+      <button class="btn-session" type="button" data-minutes="90">90 min</button>
+    </div>
+  </section>
+
+  <!-- Daily Victories -->
+  <footer class="footer-stats">
+    <div class="stats-row">
+      <span class="stats-label" data-i18n="popup_stats_label">Interceptions aujourd'hui</span>
+      <span class="stats-num" id="popup-stats-total">0</span>
+    </div>
+    <div class="stats-top" id="popup-stats-top"></div>
+  </footer>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
