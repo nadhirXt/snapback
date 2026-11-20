@@ -104,10 +104,6 @@ function applyState(state, status, lang = activeLang) {
   const lockWarning = document.getElementById("lock-warning");
   lockWarning.classList.toggle("hidden", !status.locked);
 
-  const isWelcomeParam = new URLSearchParams(window.location.search).get("welcome") === "1";
-  const welcomeCard = document.getElementById("welcome-card");
-  welcomeCard.classList.toggle("hidden", Boolean(state.onboardingDismissed) && !isWelcomeParam);
-
   const chkAuto = document.getElementById("opt-auto-trigger");
   chkAuto.checked = Boolean(state.autoTriggerEnabled);
   chkAuto.disabled = status.locked;
@@ -215,21 +211,6 @@ async function initOptions() {
       language: nextLang
     });
     if (r?.ok) {
-      applyState(r.state, r.status, r.lang);
-    }
-  });
-
-  document.getElementById("btn-test-boomerang").addEventListener("click", async () => {
-    const demoUrl = chrome.runtime.getURL("src/blocked.html?demo=1#https://instagram.com");
-    await chrome.tabs.create({ url: demoUrl });
-  });
-
-  document.getElementById("btn-dismiss-welcome").addEventListener("click", async () => {
-    const r = await chrome.runtime.sendMessage({ type: "DISMISS_ONBOARDING" });
-    if (r?.ok) {
-      if (window.location.search.includes("welcome=1")) {
-        window.history.replaceState({}, "", window.location.pathname);
-      }
       applyState(r.state, r.status, r.lang);
     }
   });

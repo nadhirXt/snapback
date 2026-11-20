@@ -417,12 +417,6 @@ async function initDesktopApp() {
 
   document.getElementById("sched-enabled").addEventListener("change", saveSched);
   document.getElementById("btn-save-schedule").addEventListener("click", saveSched);
-
-  document.getElementById("btn-desk-test").addEventListener("click", runSimulationModal);
-  document.getElementById("btn-close-sim-modal").addEventListener("click", () => {
-    if (simTimer) clearInterval(simTimer);
-    document.getElementById("sim-modal").classList.add("hidden");
-  });
 }
 
 initDesktopApp();

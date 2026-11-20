@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use sysinfo::{Pid, ProcessesToUpdate, System};
+use sysinfo::{Pid, System};
 
 #[cfg(target_os = "linux")]
 pub mod linux_x11;
@@ -23,16 +23,16 @@ pub trait Platform {
     fn send_close_tab(&self, id: u64) -> Result<(), String>;
 }
 
-/// Resolves a process executable name from its OS PID using `sysinfo`.
+/// Resolves a process executable name from its OS PID using `sysinfo 0.30`.
 pub fn process_name_for_pid(pid: u32) -> String {
     if pid == 0 {
         return String::new();
     }
     let mut sys = System::new();
     let sys_pid = Pid::from_u32(pid);
-    sys.refresh_processes(ProcessesToUpdate::Some(&[sys_pid]), true);
+    sys.refresh_processes();
     if let Some(proc_info) = sys.process(sys_pid) {
-        proc_info.name().to_string_lossy().to_string()
+        proc_info.name().to_string()
     } else {
         String::new()
     }
@@ -48,7 +48,7 @@ pub fn kill_process_by_name(target_name: &str) -> Result<usize, String> {
     sys.refresh_all();
     let mut killed = 0usize;
     for process in sys.processes().values() {
-        let name = process.name().to_string_lossy().to_lowercase();
+        let name = process.name().to_lowercase();
         let stem = name.trim_end_matches(".exe");
         if name == clean || stem == clean {
             if process.kill() {
