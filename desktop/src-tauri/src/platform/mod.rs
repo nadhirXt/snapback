@@ -20,6 +20,7 @@ pub trait Platform {
     fn list_windows(&self) -> Vec<WinInfo>;
     fn focus_window(&self, id: u64) -> Result<(), String>;
     fn minimize_window(&self, id: u64) -> Result<(), String>;
+    fn close_window(&self, id: u64) -> Result<(), String>;
     fn send_close_tab(&self, id: u64) -> Result<(), String>;
 }
 
@@ -89,6 +90,9 @@ impl Platform for UnsupportedPlatform {
         Err("Unsupported OS".into())
     }
     fn minimize_window(&self, _id: u64) -> Result<(), String> {
+        Err("Unsupported OS".into())
+    }
+    fn close_window(&self, _id: u64) -> Result<(), String> {
         Err("Unsupported OS".into())
     }
     fn send_close_tab(&self, _id: u64) -> Result<(), String> {

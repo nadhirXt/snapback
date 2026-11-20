@@ -1,21 +1,18 @@
-import { tauriListen } from "./engine.js";
+import { tauriInvoke, tauriListen } from "./engine.js";
 import { applyDomTranslations } from "./lib/i18n.js";
 
 let countdownTimer = null;
-let currentContext = null;
 
-function finishOverlay() {
+async function finishOverlay() {
   if (countdownTimer) {
     clearInterval(countdownTimer);
     countdownTimer = null;
   }
-  if (window.__TAURI__?.event?.emit) {
-    window.__TAURI__.event.emit("overlay-complete", currentContext);
-  }
+  await tauriInvoke("trigger_overlay_complete");
 }
 
 function startCountdown(ctx) {
-  currentContext = ctx;
+  if (!ctx) return;
   const lang = ctx?.lang || "fr";
   applyDomTranslations(document, lang);
 
@@ -61,4 +58,12 @@ window.addEventListener("keydown", (e) => {
 
 tauriListen("overlay-context", (payload) => {
   startCountdown(payload);
+});
+
+// Fetch context on initial load or visibility change in case the event arrived before listener attached
+window.addEventListener("focus", async () => {
+  if (!countdownTimer) {
+    const ctx = await tauriInvoke("get_overlay_context");
+    if (ctx) startCountdown(ctx);
+  }
 });

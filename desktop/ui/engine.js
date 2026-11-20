@@ -1,5 +1,5 @@
 /**
- * SnapBack Desktop Core Engine (Tauri 2 bridge + Browser fallback for instant preview).
+ * SnapBack Desktop Core Engine (Tauri 2 bridge + Browser fallback).
  */
 
 import { classifyWindow, normalizeProcessName } from "./lib/matcher.js";
@@ -15,7 +15,7 @@ import { cleanDomainList } from "./lib/rules.js";
 import { resolveLanguage } from "./lib/i18n.js";
 
 const LOCAL_STORAGE_KEY = "snapback_desktop_state";
-const GRACE_COOLDOWN_MS = 5000;
+const GRACE_COOLDOWN_MS = 4000;
 
 const MOCK_OPEN_WINDOWS = [
   { id: 101, processName: "code", title: "matcher.js — snapback — Visual Studio Code", pid: 4120 },
@@ -109,8 +109,10 @@ export class SnapBackDesktopEngine {
       this.startSession(Number(minutes) || 25);
     });
 
-    await tauriListen("overlay-complete", (payload) => {
-      this.completeInterception(payload);
+    // Native Rust thread emits overlay-complete after closing tab/app and focusing work window
+    await tauriListen("overlay-complete", () => {
+      this.pendingInterception = null;
+      this.lastInterceptionAt = Date.now();
     });
 
     // Periodic tick for session timer and open windows scan
@@ -167,7 +169,7 @@ export class SnapBackDesktopEngine {
   }
 
   async handleActiveWindow(win) {
-    if (!win) return;
+    if (!win || this.pendingInterception) return;
     const classification = classifyWindow(win, this.state);
 
     if (classification.kind === "work") {
@@ -224,32 +226,13 @@ export class SnapBackDesktopEngine {
     };
 
     this.pendingInterception = context;
+    // Safety reset in case overlay was closed manually
+    setTimeout(() => {
+      this.pendingInterception = null;
+    }, 4500);
+
+    // Rust show_overlay displays the 3s window AND schedules the native 3s close + focus execution
     await tauriInvoke("show_overlay", { payload: context });
-  }
-
-  async completeInterception(contextOverride = null) {
-    const ctx = contextOverride || this.pendingInterception;
-    this.pendingInterception = null;
-    this.lastInterceptionAt = Date.now();
-
-    await tauriInvoke("hide_overlay");
-    if (!ctx || ctx.isDemo) {
-      return;
-    }
-
-    if (ctx.distractionKind === "distraction-site" && ctx.distractionWindowId) {
-      await tauriInvoke("close_browser_tab", { id: ctx.distractionWindowId });
-    } else if (ctx.distractionKind === "distraction-app") {
-      if (ctx.shouldKill && ctx.distractionProcess) {
-        await tauriInvoke("kill_process", { processName: ctx.distractionProcess });
-      } else if (ctx.distractionWindowId) {
-        await tauriInvoke("minimize_window", { id: ctx.distractionWindowId });
-      }
-    }
-
-    if (ctx.returnTarget?.id) {
-      await tauriInvoke("focus_window", { id: ctx.returnTarget.id });
-    }
   }
 
   async startSession(minutes) {

@@ -1,6 +1,6 @@
 [package]
 name = "snapback-desktop"
-version = "1.0.0"
+version = "1.0.1"
 description = "SnapBack — Free open-source ADHD focus app for Linux and Windows"
 authors = ["Nadhir"]
 license = "MIT"

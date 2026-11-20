@@ -70,9 +70,12 @@ fn main() {
             commands::active_window,
             commands::focus_window,
             commands::minimize_window,
+            commands::close_window,
             commands::close_browser_tab,
             commands::kill_process,
             commands::show_overlay,
+            commands::get_overlay_context,
+            commands::trigger_overlay_complete,
             commands::hide_overlay,
             commands::set_strict_mode
         ])

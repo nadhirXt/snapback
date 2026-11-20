@@ -2,15 +2,17 @@
 
 use super::{process_name_for_pid, Platform, WinInfo};
 use std::mem::size_of;
-use windows::Win32::Foundation::{BOOL, HWND, LPARAM};
+use std::thread;
+use std::time::Duration;
+use windows::Win32::Foundation::{BOOL, HWND, LPARAM, WPARAM};
 use windows::Win32::System::Threading::{AttachThreadInput, GetCurrentThreadId};
 use windows::Win32::UI::Input::KeyboardAndMouse::{
     SendInput, INPUT, INPUT_0, INPUT_KEYBOARD, KEYBDINPUT, KEYEVENTF_KEYUP, VIRTUAL_KEY, VK_CONTROL,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
     BringWindowToTop, EnumWindows, GetForegroundWindow, GetWindowTextLengthW, GetWindowTextW,
-    GetWindowThreadProcessId, IsWindowVisible, SetForegroundWindow, ShowWindow, SW_MINIMIZE,
-    SW_RESTORE,
+    GetWindowThreadProcessId, IsWindowVisible, PostMessageW, SetForegroundWindow, ShowWindow,
+    SW_MINIMIZE, SW_RESTORE, WM_CLOSE,
 };
 
 pub struct WindowsPlatform;
@@ -107,9 +109,17 @@ impl Platform for WindowsPlatform {
         Ok(())
     }
 
+    fn close_window(&self, id: u64) -> Result<(), String> {
+        unsafe {
+            let hwnd = HWND(id as *mut core::ffi::c_void);
+            let _ = PostMessageW(Some(hwnd), WM_CLOSE, WPARAM(0), LPARAM(0));
+        }
+        Ok(())
+    }
+
     fn send_close_tab(&self, id: u64) -> Result<(), String> {
         self.focus_window(id)?;
-        std::thread::sleep(std::time::Duration::from_millis(45));
+        thread::sleep(Duration::from_millis(80));
 
         unsafe {
             let vk_w = VIRTUAL_KEY(0x57); // 'W'
@@ -168,6 +178,7 @@ impl Platform for WindowsPlatform {
                 return Err("SendInput Ctrl+W failed".into());
             }
         }
+        thread::sleep(Duration::from_millis(120));
         Ok(())
     }
 }
